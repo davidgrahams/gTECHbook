@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const db = require('better-sqlite3')('ourApp.db');
+const jwtSecret = process.env.JWTSECRET || 'development-secret';
 db.pragma('journal_mode = WAL');
 
 //database setup here
@@ -58,7 +59,7 @@ res.locals.errors = []
 
 //try to decode the cookie
 try {
-    const decoded = jwt.verify(req.cookies.ourSimpleApp, process.env.JWTSECRET)
+    const decoded = jwt.verify(req.cookies.ourSimpleApp, jwtSecret)
     req.user = decoded
 } catch (err) {
     req.user = false
@@ -118,7 +119,7 @@ if (!matchOrNot) {
 
     const ourTokenValue = jwt.sign(
 {exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24), skycolor: 'blue', userid: userInQuestion.id, username: userInQuestion.username},
-process.env.JWTSECRET
+jwtSecret
 )
 
 res.cookie('ourSimpleApp', ourTokenValue, {
@@ -292,7 +293,7 @@ const ourUser = lookupStatement.get(result.lastInsertRowid)
 //log the user by giving them a cookie
 const ourTokenValue = jwt.sign(
 {exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24), skycolor: 'blue', userid: ourUser.id, username: ourUser.username},
-process.env.JWTSECRET
+jwtSecret
 )
 
 res.cookie('ourSimpleApp', ourTokenValue, {
@@ -305,4 +306,12 @@ res.cookie('ourSimpleApp', ourTokenValue, {
 res.redirect('/')
 })
 
-app.listen(3000)
+const port = process.env.PORT || 3000;
+
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+
+module.exports = app;
