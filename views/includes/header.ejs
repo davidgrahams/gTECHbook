@@ -1,0 +1,12 @@
+    <header>
+        <h2><a href="/">GRAHAMS WEB APP</a></h2>
+        <nav>
+            <% if (user) { %>
+                <a href="/create-post">create post</a>
+                <a href="/logout">log Out</a>
+            <% } else { %>
+                <a href="/login">log In</a>
+            <% } %>
+        </nav>
+    </header>
+    
